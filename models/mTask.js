@@ -9,7 +9,14 @@ const mTask = {
             throw {status: 500, message: "Error al cargar las tareas"}
         }
     },
-    getOne: async () => {},
+    getOne: async (id) => {
+        try {
+            const [results] = await db.query("SELECT * FROM tasks WHERE id = ?",[ id ]);
+            return results[0];
+        } catch (err) {
+            throw {status: 500, message: "Error al cargar tarea"}
+        }
+    },
     create: async (task) => {
         try {
             await db.query("INSERT INTO tasks (title) VALUES (?)",[task.title]);
@@ -17,10 +24,49 @@ const mTask = {
             throw {status: 500, message: "Error al crear la tarea"}
         }
     },
-    update: async () => {},
-    complete: async () => {},
-    uncomplete: async () => {},
-    delete: async () => {},
+    update: async (task) => {
+        try {
+            await db.query("UPDATE tasks SET title = ? WHERE id = ?", [
+                task.title,
+                task.id,
+            ]);
+        } catch (err) {
+            throw {
+                status: 500,
+                message: `Error al actualizar la tarea con el id ${task.id}`,
+            };
+        }
+    },
+    complete: async (id) => {
+        try {
+                await db.query("UPDATE tasks SET completed = ? WHERE id = ? ", [true,id]);
+        } catch (err) {
+            throw {
+                status: 500,
+                message: `Error al completar la tarea con el id ${id}`,
+            };
+        }
+    },
+    uncomplete: async (id) => {
+        try {
+                await db.query("UPDATE tasks SET completed = ? WHERE id = ? ", [false,id]);
+        } catch (err) {
+            throw {
+                status: 500,
+                message: `Error al desmarcar la tarea con el id ${id}`,
+            };
+        }
+    },
+    delete: async (id) => {
+        try {
+                await db.query("DELETE FROM tasks WHERE id = ? ", [id]);
+        } catch (err) {
+            throw {
+                status: 500,
+                message: `Error al eliminar la tarea con el id ${id}`,
+            };
+        }
+    },
     
 }
 

@@ -5,7 +5,7 @@ const cTask = {
   getAll : async (req, res) => {
     try {
       let tasks = await mTask.getAll();
-        console.log(tasks);
+        //console.log(tasks);
       res.render("index", { title: "Lista de Tareas", tasks });
     } catch (err) {
       error.e500(req, res, err);
@@ -25,53 +25,56 @@ const cTask = {
       error.e500(req, res, err);
     }
   },
-  getEditForm : (req, res) => {
-    let id = parseInt(req.params.id);
-    let task = tasks.find((task) => task.id === id);
-    //console.log(task);
-  
-    if (!task) {
-      res.redirect("/");
-    } else {
-      res.render("edit", { title: "Editar Tarea", task });
+  getEditForm : async (req, res) => {
+    try {
+      let id = parseInt(req.params.id);
+      let task = await mTask.getOne(id);
+
+      if (!task) {
+        error.e404(req, res);
+      } else {
+        res.render("task-edit", { title: "Editar Tarea", task });
+      }
+    } catch (err) {
+      error.e500(req, res, err);
     }
   },
-  update : (req, res) => {
-    let id = parseInt(req.params.id);
-    let taskIndex = tasks.findIndex((task) => task.id === id);
-    //console.log(taskIndex);
-  
-    if (taskIndex === -1) {
+  update : async (req, res) => {
+    try {
+      let id = parseInt(req.params.id);
+      let title = req.body.title;
+      await mTask.update({ id, title });
       res.redirect("/");
-    } else {
-      tasks[taskIndex].title = req.body.title;
-      res.redirect("/");
+    } catch (err) {
+      error.e500(req, res, err);
     }
   },
-  complete : (req, res) => {
-    let id = parseInt(req.params.id);
-    let task = tasks.find((task) => task.id === id);
-  
-    if (task) {
-      task.completed = true;
+  complete : async(req, res) => {
+    try {
+      let id = parseInt(req.params.id)
+      await mTask.complete(id);
+      res.redirect("/");
+    } catch (err) {
+      error.e500(req, res, err);
     }
-  
-    res.redirect("/");
   },  
-  uncomplete : (req, res) => {
-    let id = parseInt(req.params.id);
-    let task = tasks.find((task) => task.id === id);
-  
-    if (task) {
-      task.completed = false;
+  uncomplete : async(req, res) => {
+    try {
+      let id = parseInt(req.params.id)
+      await mTask.uncomplete(id);
+      res.redirect("/");
+    } catch (err) {
+      error.e500(req, res, err);
     }
-  
-    res.redirect("/");
   },  
-  delete : (req, res) => {
-    let id = parseInt(req.params.id);
-    tasks = tasks.filter((task) => task.id !== id);
-    res.redirect("/");
+  delete : async (req, res) => {
+    try {
+      let id = parseInt(req.params.id)
+      await mTask.delete(id);
+      res.redirect("/");
+    } catch (err) {
+      error.e500(req, res, err);
+    }
   },
 }
 
